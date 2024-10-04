@@ -32,6 +32,8 @@ class PostController extends Controller
         // Пагинация
         $posts = $query->paginate(12);
 
+
+
         return Inertia::render('Post/AllPosts', [
             'posts' => $posts->items(),
             'paginationLinks' => $posts->linkCollection(),

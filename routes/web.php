@@ -29,7 +29,7 @@ Route::get('/', function (Request $request) {
     return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'posts' => Post::where('is_private', false)->get(),
+        'posts' => Post::where('is_private', false)->withCount('comments')->get(),
         'user' => Auth::user(),
         'isAuth' => $request->user() ? true : false
     ]);

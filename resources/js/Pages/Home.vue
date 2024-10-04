@@ -73,6 +73,9 @@ defineProps<{
             </div>
         </section>
     </MainLayout>
+
+    <pre>{{ posts }}</pre>
+
 </template>
 
 <style scoped>
