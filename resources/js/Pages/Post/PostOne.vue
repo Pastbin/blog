@@ -22,9 +22,22 @@
                     :key="comment.id"
                 >
                     <div>{{ comment.comment }}</div>
-                    <i>{{ comment.user.name }} {{ new Date(comment.created_at).toLocaleString() }}</i>
+                    <i
+                        >{{ comment.user.name }}
+                        {{ new Date(comment.created_at).toLocaleString() }}</i
+                    >
                 </li>
             </ul>
+        </div>
+
+        <div class="form-group">
+            <label for="rating">Rate this post</label>
+            <select v-model="ratingValue" class="form-control" id="rating">
+                <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+            </select>
+            <button class="btn btn-primary mt-2" @click="submitRating">
+                Submit
+            </button>
         </div>
 
         <div class="my-5 add_comments">
@@ -56,6 +69,7 @@
 import { Head, useForm } from "@inertiajs/vue3";
 import MainLayout from "@/Layouts/MainLayout.vue";
 import Title from "@/Components/Title.vue";
+import { ref } from "vue";
 
 const props = defineProps({
     post: Object,
@@ -67,9 +81,25 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route("comments.store", props.post.id), {onSuccess(){
-        form.reset()
-    }});
+    form.post(route("comments.store", props.post.id), {
+        onSuccess() {
+            form.reset();
+        },
+    });
+};
+
+const ratingValue = ref(1);
+
+const form2 = useForm({
+    value: ratingValue.value,
+});
+
+const submitRating = () => {
+    form2.post(route("ratings.store", post.id), {
+        onSuccess: () => {
+            alert("Rating submitted successfully");
+        },
+    });
 };
 </script>
 

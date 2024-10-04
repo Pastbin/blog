@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\RatingController;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +25,10 @@ Route::get('/api/subscriptions', [SubscriptionController::class, 'index'])->midd
 Route::post('/api/posts/{postId}/comments', [CommentController::class, 'store'])->middleware('auth')->name('comments.store');
 Route::delete('/api/comments/{id}', [CommentController::class, 'destroy'])->middleware('auth')->name('comments.destroy');
 Route::post('/api/posts/{id}/rate', [PostController::class, 'rating'])->middleware('auth')->name('posts.rating');
+
+//рейтинг
+Route::post('/posts/{post}/rate', [RatingController::class, 'store'])->name('ratings.store');
+
 
 Route::get('/', function (Request $request) {
     return Inertia::render('Home', [

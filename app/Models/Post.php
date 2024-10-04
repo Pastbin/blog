@@ -18,19 +18,17 @@ class Post extends Model
         'rating',
     ];
 
+    public function calculateAverageRating()
+    {
+        $this->rating = $this->ratings()->avg('value');
+        $this->save();
+    }
+
     public function ratings()
     {
         return $this->hasMany(Rating::class);
     }
 
-    public function calculateAverageRating()
-    {
-        if ($this->ratings()->count() > 0) {
-            $average = $this->ratings()->avg('value');
-            $this->rating = round($average, 2);
-            $this->save();
-        }
-    }
 
     public function tags()
     {
