@@ -74,7 +74,7 @@
     <div
         class="toast-container position-fixed bottom-0 end-0 p-3"
     >
-        <div id="toast" class="toast show bg-success">
+        <div id="toast" class="toast bg-success">
             <div class="toast-header">
                 <strong class="me-auto">Уведомление</strong>
                 <button
@@ -101,10 +101,11 @@ const props = defineProps({
 const form = useForm({
     title: props.post.title,
     body: props.post.body,
-    image: null,
+    image: props.post.image,
     tags: props.post.tags,
-    is_private: props.post.is_private,
+    is_private: !!props.post.is_private,
 });
+
 
 const submit = () => {
     form.put(route("posts.update", props.post.id), {
