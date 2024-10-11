@@ -3,11 +3,13 @@ import { Head, Link, usePage } from "@inertiajs/vue3";
 import MainLayout from "@/Layouts/MainLayout.vue";
 import Title from "@/Components/Title.vue";
 import PostCard from "@/Components/Post/PostCard.vue";
+import Pagination from "@/Components/Pagination.vue";
 
 defineProps<{
     canLogin?: boolean;
     canRegister?: boolean;
-    posts?: Array<any>;
+    posts?: { data: Array<any>; links: [] };
+    pagination: Array<any>;
 }>();
 </script>
 
@@ -53,14 +55,17 @@ defineProps<{
         <section class="posts">
             <Title title="Блог" />
             <div class="my-5 posts_items">
-                <div v-for="post in posts?.slice(0, 8)" :key="post.id">
+                <div v-for="post in posts?.data?.slice(0, 8)" :key="post.id">
                     <PostCard :post="post" />
                 </div>
             </div>
 
-            <p v-if="!posts?.length" class="text-center text-2xl">
+            <p v-if="!posts?.data?.length" class="text-center text-2xl">
                 Постов пока нет.
             </p>
+
+            <Pagination :pagination-links="posts?.links" />
+
             <div class="d-flex gap-4 justify-content-center">
                 <a :href="route('posts.index')"
                     ><button class="btn btn-primary">
@@ -73,9 +78,6 @@ defineProps<{
             </div>
         </section>
     </MainLayout>
-
-    <pre>{{ posts }}</pre>
-
 </template>
 
 <style scoped>

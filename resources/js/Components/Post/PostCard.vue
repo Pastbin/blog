@@ -4,11 +4,18 @@
             <img :src="post.image" alt="" class="card-img-top" />
             <div class="card-body">
                 <h5 class="card-title">{{ post.title }}</h5>
-                <p class="card-text">{{ post.body }}</p>
-
-                <!-- Добавленные блоки -->
+                <span>{{ post.body }}</span>
+                <div class="tags">
+                            <span
+                                v-for="tag in post?.tags?.split(',')"
+                                :key="tag"
+                                class="badge bg-primary me-2"
+                            >
+                                {{ tag }}
+                            </span>
+                        </div>
                 <div
-                    class="d-flex justify-content-between align-items-center mt-3"
+                    class="d-flex justify-content-between align-items-center mt-1"
                 >
                     <!-- Рейтинг -->
                     <div class="rating">
@@ -16,6 +23,7 @@
                             <i class="bi bi-star-fill"></i> {{ post.rating }}
                         </span>
                     </div>
+
                     <!-- Комментарии -->
                     <div class="comments">
                         <span class="badge bg-info">
@@ -26,7 +34,9 @@
 
                     <!-- Дата публикации -->
                     <div class="post-date">
-                        <small class="text-muted">{{ formatDate(post.created_at) }}</small>
+                        <small class="text-muted">{{
+                            formatDate(post.created_at)
+                        }}</small>
                     </div>
                 </div>
             </div>
@@ -36,16 +46,16 @@
 
 <script setup>
 import { Link } from "@inertiajs/vue3";
-import dayjs from 'dayjs';
-import 'dayjs/locale/ru';
-dayjs.locale('ru');
+import dayjs from "dayjs";
+import "dayjs/locale/ru";
+dayjs.locale("ru");
 
 const props = defineProps({
     post: Object,
 });
 
 function formatDate(date) {
-    return dayjs(date).format('HH:mm DD.MM.YYYY');
+    return dayjs(date).format("HH:mm DD.MM.YYYY");
 }
 </script>
 

@@ -30,9 +30,7 @@ class PostController extends Controller
         }
 
         // Пагинация
-        $posts = $query->paginate(12);
-
-
+        $posts = $query->withCount('comments')->paginate(8);
 
         return Inertia::render('Post/AllPosts', [
             'posts' => $posts->items(),
@@ -40,21 +38,17 @@ class PostController extends Controller
         ]);
     }
 
-
-
     // Создаем форму для создания нового поста
     public function create()
     {
-        $tags = Tag::all();
-        return Inertia::render('Post/AddPost', ['tags' => $tags]);
+        return Inertia::render('Post/AddPost');
     }
 
     // Показываем пост по ID
-    public function show($id)
+    public function show(Post $post)
     {
-        $post = Post::with('tags')->findOrFail($id);
-        $comments = Comment::where('post_id', $id)->with('user')->get();
-        return Inertia::render('Post/PostOne', ['post' => $post, 'comments' => $comments]);
+        $post->load('comments.user');
+        return Inertia::render('Post/PostOne', ['post' => $post]);
     }
 
     // Создаем новый пост
@@ -65,7 +59,7 @@ class PostController extends Controller
             'body' => 'required',
             'is_private' => 'boolean',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:4096',
-            'tags' => 'array',
+            'tags' => 'string|max:255',
         ]);
 
         $post = Post::create([
@@ -73,6 +67,7 @@ class PostController extends Controller
             'title' => $request->title,
             'body' => $request->body,
             'is_private' => $request->is_private ?? false,
+            'tags' => $request->input('tags', ''),
         ]);
 
         if ($request->hasFile('image')) {
@@ -83,19 +78,20 @@ class PostController extends Controller
             $post->save();
         }
 
-        if ($request->has('tags')) {
-            $post->tags()->attach($request->input('tags'));
-        }
-
         return redirect()->route('posts.index');
+    }
+
+    public function edit(Post $post)
+    {
+        $this->authorize('update', $post);
+        return Inertia::render('Post/PostEdit', ['post' => $post]);
     }
 
     // Редактируем пост
     public function update(Request $request, $id)
     {
         $post = Post::findOrFail($id);
-        $this->authorize('update', $post);
-
+        $this->authorize('updateTags', $post);
         $post->update($request->all());
 
         if ($request->hasFile('image')) {
@@ -106,41 +102,17 @@ class PostController extends Controller
             $post->save();
         }
 
-        if ($request->has('tags')) {
-            $post->tags()->sync($request->input('tags'));
-        }
-
-        return response()->json($post);
+        return redirect()->back()->with('success', 'Пост обновлен');
     }
 
     // Удаляем пост
-    public function destroy($id)
+    public function destroy(Post $post)
     {
-        $post = Post::findOrFail($id);
-        $this->authorize('delete', $post);
-
-        $post->delete();
-        return response()->json(['message' => 'Пост удален']);
-    }
-
-    public function rating(Request $request, $id)
-    {
-        $post = Post::findOrFail($id);
-        $this->authorize('rate', $post);
-
-        $ratingValue = $request->input('value');
-        if (!is_numeric($ratingValue) || $ratingValue < 1 || $ratingValue > 5) {
-            return response()->json(['error' => 'Invalid rating value'], 422);
+        if (Auth::user()->is_admin) {
+            $post->delete();
+            return response()->json(['message' => 'Пост удалён']);
+        } else {
+            return response()->json(['message' => 'Доступ запрещён'], 403);
         }
-
-        Rating::create([
-            'user_id' => Auth::id(),
-            'post_id' => $id,
-            'value' => $ratingValue,
-        ]);
-
-        $post->calculateAverageRating();
-
-        return response()->json(['message' => 'Rating added successfully', 'average_rating' => $post->rating]);
     }
 }

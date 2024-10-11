@@ -16,6 +16,7 @@ class Post extends Model
         'is_private',
         'image',
         'rating',
+        'tags',
     ];
 
     public function calculateAverageRating()
@@ -27,12 +28,6 @@ class Post extends Model
     public function ratings()
     {
         return $this->hasMany(Rating::class);
-    }
-
-
-    public function tags()
-    {
-        return $this->belongsToMany(Tag::class);
     }
 
     public function comments()

@@ -12,13 +12,24 @@
             <p class="post_body">{{ post.body }}</p>
         </div>
 
+        <div>
+            <div class="my-3" v-if="post.tags">
+                <span
+                    v-for="tag in post.tags.split(',')"
+                    :key="tag.id"
+                    class="badge bg-primary me-2"
+                    >{{ tag }}</span
+                >
+            </div>
+        </div>
+
         <div class="comments my-5">
             <h3>Комментарии</h3>
             <ul class="list-group">
-                <li v-if="!comments?.length">Нет ни одного комментария</li>
+                <li v-if="!post.comments?.length">Нет ни одного комментария</li>
                 <li
                     class="list-group-item"
-                    v-for="comment in comments"
+                    v-for="comment in post.comments"
                     :key="comment.id"
                 >
                     <div>{{ comment.comment }}</div>
@@ -30,14 +41,37 @@
             </ul>
         </div>
 
-        <div class="form-group">
-            <label for="rating">Rate this post</label>
-            <select v-model="ratingValue" class="form-control" id="rating">
-                <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
-            </select>
-            <button class="btn btn-primary mt-2" @click="submitRating">
-                Submit
+        <div v-if="$page.props.auth.user" class="form-group">
+            <label for="rating">Рейтинг</label>
+            <div class="rating cursor-pointer">
+                <i
+                    v-for="n in 5"
+                    :key="n"
+                    @click="form2.value = n"
+                    :class="{
+                        'bi bi-star-fill': n <= form2.value,
+                        'bi bi-star': n > form2.value,
+                    }"
+                ></i>
+            </div>
+            <button class="btn btn-primary mt-2" @click="submitRating(post.id)">
+                Отправить
             </button>
+
+            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                <div id="rating-toast" class="toast">
+                    <div class="toast-header">
+                        <strong class="me-auto">Уведомление</strong>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="toast"
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div class="toast-body">Рейтинг обновлен!</div>
+                </div>
+            </div>
         </div>
 
         <div class="my-5 add_comments">
@@ -62,7 +96,25 @@
                 Пожалуйста, войдите, чтобы оставить комментарий
             </p>
         </div>
+
+        <div
+            v-if="
+                $page.props.auth.user.id === post.user_id ||
+                $page.props.auth.user.is_admin
+            "
+            class="d-flex gap-3 flex-wrap"
+        >
+            <button class="btn btn-danger" @click="deletePost(post.id)">
+                Удалить пост
+            </button>
+
+            <a :href="route('posts.edit', post.id)"
+                ><button class="btn btn-warning">Редактировать пост</button></a
+            >
+        </div>
     </MainLayout>
+
+    <pre>{{ post }}</pre>
 </template>
 
 <script setup>
@@ -70,10 +122,10 @@ import { Head, useForm } from "@inertiajs/vue3";
 import MainLayout from "@/Layouts/MainLayout.vue";
 import Title from "@/Components/Title.vue";
 import { ref } from "vue";
+import axios from "axios";
 
 const props = defineProps({
     post: Object,
-    comments: Array,
 });
 
 const form = useForm({
@@ -82,24 +134,35 @@ const form = useForm({
 
 const submit = () => {
     form.post(route("comments.store", props.post.id), {
+        preserveScroll: true,
         onSuccess() {
             form.reset();
         },
     });
 };
 
-const ratingValue = ref(1);
+const ratingValue = ref(props.post.rating);
 
 const form2 = useForm({
     value: ratingValue.value,
 });
 
-const submitRating = () => {
-    form2.post(route("ratings.store", post.id), {
+const submitRating = (id) => {
+    form2.post(route("ratings.store", id), {
+        preserveScroll: true,
         onSuccess: () => {
-            alert("Rating submitted successfully");
+            const toast = document.getElementById("rating-toast");
+            toast.classList.add("show");
         },
     });
+};
+
+const deletePost = (id) => {
+    if (confirm("Вы уверены, что хотите удалить этот пост?")) {
+        axios.delete(route("posts.destroy", id)).then(() => {
+            window.location.href = route("posts.index");
+        });
+    }
 };
 </script>
 

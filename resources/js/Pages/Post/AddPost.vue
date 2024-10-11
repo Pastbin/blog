@@ -7,20 +7,26 @@
                 class="form d-flex flex-column gap-3"
                 @submit.prevent="submit"
             >
-                <input
-                    class="form-control"
-                    type="text"
-                    v-model="form.title"
-                    placeholder="Заголовок"
-                    required
-                />
-                <textarea
-                    class="form-control"
-                    v-model="form.body"
-                    placeholder="Описание"
-                    rows="5"
-                    required
-                ></textarea>
+                <label class="form-label">
+                    Заголовок
+                    <input
+                        class="form-control"
+                        type="text"
+                        v-model="form.title"
+                        placeholder="Заголовок"
+                        required
+                    />
+                </label>
+                <label class="form-label">
+                    Описание
+                    <textarea
+                        class="form-control"
+                        v-model="form.body"
+                        placeholder="Описание"
+                        rows="5"
+                        required
+                    ></textarea>
+                </label>
 
                 <div
                     v-if="form.image"
@@ -35,6 +41,11 @@
                         X
                     </button>
                 </div>
+
+                <label class="form-label">
+                    Теги (через запятую)
+                    <input class="form-control" type="text" v-model="form.tags" required />
+                </label>
 
                 <button
                     class="btn btn-primary position-relative"
@@ -69,14 +80,10 @@
                             Приватный</label
                         >
                     </div>
-
                 </div>
-                <div
-                        v-if="form.recentlySuccessful"
-                        class="alert alert-success"
-                    >
-                        Пост создан!
-                    </div>
+                <div v-if="form.recentlySuccessful" class="alert alert-success">
+                    Пост создан!
+                </div>
             </form>
         </div>
     </MainLayout>
@@ -92,13 +99,14 @@ const form = useForm({
     body: "",
     image: null,
     is_private: false,
+    tags: "",
 });
 
 function submit() {
     form.post(route("posts.store"), {
         onSuccess: () => {
             form.reset();
-        }
+        },
     });
 }
 </script>

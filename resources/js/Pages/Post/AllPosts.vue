@@ -1,6 +1,11 @@
 <template>
     <MainLayout>
         <Title :title="'Все посты'" />
+        <Head title="Все посты" />
+
+        <a :href="route('posts.create')" v-if="$page.props.auth.user"
+                    ><button class="btn btn-primary my-3">Добавить пост</button></a
+                >
 
         <section>
             <div>
@@ -28,8 +33,8 @@
                             v-model="order"
                             @change="redirectToSortedPage"
                         >
-                            <option value="asc">По возрастанию</option>
                             <option value="desc">По убыванию</option>
+                            <option value="asc">По возрастанию</option>
                         </select>
                     </div>
                 </div>
@@ -40,35 +45,7 @@
                     </div>
                 </div>
 
-                <nav
-                    v-if="paginationLinks && paginationLinks.length > 3"
-                    class="mt-5 d-flex"
-                >
-                    <ul class="pagination mx-auto">
-                        <li class="page-item">
-                            <a :href="paginationLinks[0].url" class="page-link"
-                                ><<</a
-                            >
-                        </li>
-                        <li
-                            v-for="link in paginationLinks.slice(1, -1)"
-                            :key="link.url"
-                            class="page-item"
-                            :class="{ active: link.active }"
-                        >
-                            <a :href="link.url" class="page-link">{{
-                                link.label
-                            }}</a>
-                        </li>
-                        <li class="page-item">
-                            <a
-                                :href="paginationLinks.at(-1).url"
-                                class="page-link"
-                                >>></a
-                            >
-                        </li>
-                    </ul>
-                </nav>
+                <Pagination :pagination-links="paginationLinks" />
             </div>
         </section>
     </MainLayout>
@@ -79,6 +56,8 @@ import { ref, onMounted } from "vue";
 import Title from "@/Components/Title.vue";
 import MainLayout from "@/Layouts/MainLayout.vue";
 import PostCard from "@/Components/Post/PostCard.vue";
+import Pagination from "@/Components/Pagination.vue";
+import { Head } from "@inertiajs/vue3";
 
 // Параметры сортировки
 const sortBy = ref("created_at");

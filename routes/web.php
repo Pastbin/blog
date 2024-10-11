@@ -24,7 +24,6 @@ Route::get('/api/subscriptions', [SubscriptionController::class, 'index'])->midd
 // Маршруты для комментариев
 Route::post('/api/posts/{postId}/comments', [CommentController::class, 'store'])->middleware('auth')->name('comments.store');
 Route::delete('/api/comments/{id}', [CommentController::class, 'destroy'])->middleware('auth')->name('comments.destroy');
-Route::post('/api/posts/{id}/rate', [PostController::class, 'rating'])->middleware('auth')->name('posts.rating');
 
 //рейтинг
 Route::post('/posts/{post}/rate', [RatingController::class, 'store'])->name('ratings.store');
@@ -34,7 +33,7 @@ Route::get('/', function (Request $request) {
     return Inertia::render('Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'posts' => Post::where('is_private', false)->withCount('comments')->get(),
+        'posts' => Post::where('is_private', false)->withCount('comments')->paginate(8),
         'user' => Auth::user(),
         'isAuth' => $request->user() ? true : false
     ]);

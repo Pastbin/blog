@@ -16,6 +16,11 @@ class PostPolicy
         return true;
     }
 
+    public function updateTags(User $user, Post $post)
+    {
+        return $user->id === $post->user_id || $user->is_admin;
+    }
+
     /**
      * Determine whether the user can view the model.
      */
